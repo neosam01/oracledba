@@ -1,0 +1,94 @@
+select process,status,sequence# from v$managed_standby;
+
+PROCESS   STATUS        SEQUENCE#
+--------- ------------ ----------
+ARCH      CONNECTED             0
+ARCH      CONNECTED             0
+MRP0      WAIT_FOR_GAP     336544
+
+
+
+SELECT database_role FROM v$database;
+DATABASE_ROLE
+----------------
+PHYSICAL STANDBY
+
+alter database recover managed standby database using current logfile disconnect from session;
+
+
+START MRP
+ALTER DATABASE RECOVER MANAGED STANDBY DATABASE DISCONNECT FROM SESSION;
+
+STOP MRP
+ALTER DATABASE RECOVER MANAGED STANDBY DATABASE CANCEL;
+
+MOUNT STANDBY DATABASE
+alter database mount standby database;
+
+
+To take archive backups from a particular logseq
+restore archivelog from logseq 336542;
+restore archivelog from logseq 336542 thread 2;
+
+TO APPLY A LOGFILE
+----------------------
+alter database register logfile '/u06/oradata/PPLOPD1SB/arch/1_490730_703862164.arc';
+
+
+ALTER DATABASE ADD STANDBY LOGFILE GROUP 4 
+
+alter database add standby logfile group 4 ('+DBDISK1','+FLDISK1') size 52428800;
+
+alter database add standby logfile group 5 ('+DBDISK1','+FLDISK1') size 52428800;
+
+alter database add standby logfile group 6 ('+DBDISK1','+FLDISK1') size 52428800;
+
+alter database add standby logfile group 7 ('+DBDISK1','+FLDISK1') size 52428800;
+
+---------------------------------------------------------------------------------------------------------------
+
+Set desiniation for FSFO LGWR SYNC AFFIRM 
+
+alter system set log_archive_dest_4='service="(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=SUL73003)(PORT = 1521)))(CONNECT_DATA=(SERVER=DEDICATED)(INSTANCE_NAME=RMANREPO)(SERVICE_NAME=RMANREPOAPP2)))"','LGWR SYNC AFFIRM delay=0 OPTIONAL max_failure=0 max_connections=1 reopen=300 db_unique_name="RMANREPOSBY" register net_timeout=180 valid_for=(online_logfile,primary_role)';
+
+
+
+select dest_name, status, type, database_mode, recovery_mode, error, destination, synchronization_status from v$archive_dest_status;
+
+DEST_NAME            STATUS    TYPE           DATABASE_MODE   RECOVERY_MODE           ERROR                          DESTINATION                SYNCHRONIZATION_STATUS 
+-------------------- --------- -------------- --------------- ----------------------- ------------------------------ ------------------------------ ----------------------------------------
+LOG_ARCHIVE_DEST_1   VALID     LOCAL          OPEN            IDLE                                                                                  CHECK CONFIGURATION
+LOG_ARCHIVE_DEST_2   VALID     LOCAL          OPEN            IDLE                                                                                  CHECK CONFIGURATION
+LOG_ARCHIVE_DEST_3   ERROR     PHYSICAL       UNKNOWN         UNKNOWN                 ORA-12514: TNS:listener does   (DESCRIPTION=(ADDRESS_LIST=(AD CHECK CONFIGURATION
+                                                                                      not currently know of service  DRESS=(PROTOCOL=tcp)(HOST=sul7
+                                                                                      requested in connect           3002)(PORT=1521)))(CONNECT_DAT
+                                                                                      descriptor                     A=(SERVICE_NAME=RMANREPOSBY_XPT.
+                                                                                                                     world)(INSTANCE_NAME=RMANREPO)(S
+                                                                                                                     ERVER=dedicated)))
+
+LOG_ARCHIVE_DEST_4   INACTIVE  LOCAL          OPEN            IDLE                                                                                  CHECK CONFIGURATION
+LOG_ARCHIVE_DEST_5   INACTIVE  LOCAL          OPEN            IDLE                                                                                  CHECK CONFIGURATION
+LOG_ARCHIVE_DEST_6   INACTIVE  LOCAL          OPEN            IDLE                                                                                  CHECK CONFIGURATION
+LOG_ARCHIVE_DEST_7   INACTIVE  LOCAL          OPEN            IDLE                                                                                  CHECK CONFIGURATION
+LOG_ARCHIVE_DEST_8   INACTIVE  LOCAL          OPEN            IDLE                                                                                  CHECK CONFIGURATION
+LOG_ARCHIVE_DEST_9   INACTIVE  LOCAL          OPEN            IDLE                                                                                  CHECK CONFIGURATION
+LOG_ARCHIVE_DEST_10  INACTIVE  LOCAL          OPEN            IDLE                                                                                  CHECK CONFIGURATION
+
+10 rows selected.
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+DISABLE FAST_START FAILOVER;
+
+
+show database 'RMANREPO' statusreport;
+STATUS REPORT
+       INSTANCE_NAME   SEVERITY ERROR_TEXT
+              RMANREPO    WARNING ORA-16714: the value of property LogFileNameConvert is inconsistent with the database setting
+
+
+
+
+
+
+
